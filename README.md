@@ -18,7 +18,7 @@ Wrox(현 Willy) · 2014년 9월 9일 출시</br>
 
 - **CUDA를 이용한 GPU 프로그래밍 기술을 익힌다.**
 
-  > 병렬 프로그래밍의 개념윽 익히고 CUDA를 이용해 실습한다.
+  > computer architecture와 parallel computing 개념을 익히고 CUDA를 이용해 실습한다.
 
 
 </br>
@@ -30,6 +30,10 @@ Wrox(현 Willy) · 2014년 9월 9일 출시</br>
 - [heterogeneous parallel computing with CUDA](https://github.com/erectbranch/CUDA_Basic/tree/master/ch01)
 
   > parallel computing, concurrency, sequential programming, task/data/block/cyclic parallelism
+
+  > SISD/SIMD/MISD/MIMD, latency, bandwidth, throughput, multi-node with distributed memory/multiprocessor with shared memory, heterogeneous computing, host/device code
+
+  > CUDA 간단 예제: hello world 출력
 
 <br/>
 
