@@ -2,7 +2,7 @@
 
 **high-performance computing**(HPC)를 실현하기 위해서는 computer architecture뿐만 아니라, hardware systems, software tool, programming platforms, 그리고 parallel programming paradigms를 고려해야 한다.
 
-> 들어가기 앞서 이 책(2014 출시)은 CUDA 6.0(현재 12.0.x까지 나왔다.)와, Kepler architecture(현재 RTX 4090이 나왔다.)를 사용하므로 현재 실정과는 거리가 있다.
+> 들어가기 앞서 이 책(2014 출시)은 CUDA 6.0(현재 12.0.x까지 나왔다.)와, Kepler architecture(현재 Ada Lovelace architecture로 구성된 RTX 4090이 나왔다.)를 사용하므로 현재 실정과는 거리가 있다.
 
 ---
 
@@ -112,13 +112,13 @@ computer architecture를 분류하는 방법은 다양하게 있지만, **Flynn'
 
 - **MIMD**(Multiple Instruction Multiple Data)
 
-SISD는 traditional computer에 해당한다. 오직 core가 한 개 존재하며, 한 번에 오직 한 instruction stream만 실행된다. 
+**SISD**는 traditional computer에 해당한다. 오직 core가 한 개 존재하며, 한 번에 오직 한 instruction stream만 실행된다. 
 
-SIMD는 parallel architecture에 속한다. multiple core를 가지며 모든 core가 한 번에 '같은 instruction을 execute'한다. (대부분의 modern computer가 SIMD에 속한다.) SIMD의 가장 큰 장점은 compiler 덕분에 프로그래머들은 sequential하게 program을 구성해도 parallel speedup을 달성할 수 있다는 점이다.
+**SIMD**는 parallel architecture에 속한다. multiple core를 가지며 모든 core가 한 번에 '같은 instruction을 execute'한다. (대부분의 modern computer가 SIMD에 속한다.) SIMD의 가장 큰 장점은 compiler 덕분에 프로그래머들은 sequential하게 program을 구성해도 parallel speedup을 달성할 수 있다는 점이다.
 
-MISD는 비교적 드문 architecture로, multiple core가 seperate instruction stream을 통해 같은 data stream을 처리한다.
+**MISD**는 비교적 드문 architecture로, multiple core가 seperate instruction stream을 통해 같은 data stream을 처리한다.
 
-MIMD는 multiple core를 사용한 parallel architecture다. multiple data stream으로 구성되며 각각은 independent instruction을 처리한다. 참고로 대부분의 MIMD architecture는 sub-component로 SIMD를 포함한다.
+**MIMD**는 multiple core를 사용한 parallel architecture다. multiple data stream으로 구성되며 각각은 independent instruction을 처리한다. 참고로 대부분의 MIMD architecture는 sub-component로 SIMD를 포함한다.
 
 architecture level에서는 다음 조건을 만족시킬 수 있도록 고려해야 한다.
 

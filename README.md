@@ -20,6 +20,17 @@ Wrox(현 Willy) · 2014년 9월 9일 출시</br>
 
   > 병렬 프로그래밍의 개념윽 익히고 CUDA를 이용해 실습한다.
 
+
+</br>
+
+## 🚩 정리한 문서 목록
+
+### 📔 computer architecture, CUDA 기초
+
+- [heterogeneous parallel computing with CUDA](https://github.com/erectbranch/CUDA_Basic/tree/master/ch01)
+
+  > parallel computing, concurrency, sequential programming, task/data/block/cyclic parallelism
+
 <br/>
 
 ## :mag: 목차
