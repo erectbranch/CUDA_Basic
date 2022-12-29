@@ -9,7 +9,7 @@
   
 
 <b>John Cheng · Max Grossman · Ty McKercher 저</b></br>
-Wrox(현 Willy) · 2014년 9월 9일 출시</br>
+Wrox(現 Willy) · 2014년 9월 9일 출시</br>
 [[ERRATA](https://www.wiley.com/en-us/Professional+CUDA+C+Programming-p-9781118739327)] [[Code Samples](https://media.wiley.com/product_ancillary/29/11187393/DOWNLOAD/CodeSamples.zip)] [[Solutions](https://media.wiley.com/product_ancillary/29/11187393/DOWNLOAD/Solutions.zip)]</b> 
 
 </div>
