@@ -22,19 +22,21 @@ programming model은 application이 hardware에서 구현이 가능하도록 하
 
 - access memory on the GPU through a hierarchy structure
 
-프로그래머 관점에서는 parallel computation을 다른 level에서 본다. 
+<br/>
+
+프로그래머 관점에서는 parallel computation을 다음과 같은 level로 본다. 
 
 - domain level
 
-program과 algorithm을 디자인할 때 해당하는 level이다. 어떻게 data와 function을 **decompose**(분해)해야 올바르고 효율적으로 program을 parallel할 수 있을지 고민한다.
+    program과 algorithm을 디자인할 때 해당하는 level이다. 어떻게 data와 function을 **decompose**(분해)해야 효율적으로 program이 parallel하게 수행될지 고민한다.
 
 - logic level
 
-program과 algorithm 디자인이 끝나면 programming 단계로 넘어간다. 어떻게 구성해야 logic을 concurrent thread들로 구성할 수 있는지 고민한다. 
+    program과 algorithm 디자인이 끝나면 programming 단계로 넘어간다. 어떻게 구성해야 logic을 concurrent thread들로 구성할 수 있는지 고민한다. 
 
 - hardware level
 
-thread들을 효율 좋게 core로 mapping하는 여부 등을 고려한다.
+    thread를 효율 좋게 core에 mapping하는 방법 등을 고려한다.
 
 ---
 
@@ -544,7 +546,7 @@ CHECK(cudaDeviceSynchronize());    // cudaError_t cudaDeviceSynchronize(void);�
 
 ### 2.7 compiling and Executing
 
-1차원 array A, B의 행렬 덧셈을 수행한 뒤 연산 결과를 array C에 저장할 것이다. 연산은 host 버전 행렬 덧셈(sumArraysOnHost)과 GPU 버전 행렬 덧셈(sumArraysOnGPU)을 모두 수행한 뒤 서로의 연산 결과를 비교(checkResult)해 볼 것이다. 파일명은 sumArraysOnGPU-small-case.cu -o addvector이다.
+1차원 array A, B(즉, vector)의 vector addition을 수행한 뒤 연산 결과를 array C에 저장할 것이다. 연산은 host 버전 vector addition(sumArraysOnHost)과 GPU 버전 vector addition(sumArraysOnGPU)을 모두 수행한 뒤 서로의 연산 결과를 비교(checkResult)해 볼 것이다. 파일명은 sumArraysOnGPU-small-case.cu -o addvector이다.
 
 > 계산 결과의 신뢰성을 검토하려면 double type의 오차 허용 범위 내에서 비교를 하면 된다. 현재 예제에서는 오차의 절댓값을 1.0e-8 이하까지 허용하게 구성했다.
 
