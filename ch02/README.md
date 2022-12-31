@@ -125,7 +125,7 @@ char* cudaGetErrorString(cudaError_t error)
 
 ![array summation](images/array_summation.png)
 
-우선 위 그림과 같은 array 연산(host-based array summation)을 C를 사용해서 구현한다. 파일명은 sumArraysOnHost.c이다.
+우선 위 그림과 같은 array 연산(host-based array summation)을 오직 C만 사용해서 구현한다. 파일명은 sumArraysOnHost.c이다.
 
 ```c
 #include <stdlib.h>
@@ -296,7 +296,7 @@ kernel launch 구문에서 execution configutation parameters(<<<...>>>)로 grid
 
 - i = blockIdx.x * blockDim.x + threadIdx.x
 
-> block이 1D이며, thread가 256개라고 하자. 그러면 block 0의 thread에서 i의 범위는 0~255 / block 1의 thread에서는 i의 범위가 256~511 / block 2의 thread에서는 i의 범위가 512~767... 식으로 배정된다.
+> block이 1D이며, thread가 256개라고 하자. 그러면 block 0의 thread에서 i의 범위는 0\~255 / block 1의 thread에서는 i의 범위가 256\~511 / block 2의 thread에서는 i의 범위가 512\~767... 식으로 배정된다.
 
 > 이런 방법으로 index i를 이용하여 vector A, B, C 값에 접근할 수 있다.
 
@@ -308,7 +308,7 @@ kernel launch 구문에서 execution configutation parameters(<<<...>>>)로 grid
 
 > block 개수를 구하는 식이 있다. 예를 들어 vector size가 1000이고 각 block이 256개의 thread를 가진다면, (1000 + 256 - 1) / 256 = 4로 4개의 block을 생성하게 된다. 이 경우 결과적으로는 256*4 = 1024 thread가 실행되고, 나머지 24개는 연산을 수행하지 않도록 해야 한다.
 
-> 비슷하게(1D block) grid는 (nElem + block.x - 1)/block.x) 개가 된다.
+> 비슷하게 grid는 (nElem + block.x - 1)/block.x) 개가 된다.
 
 <br/>
 
@@ -469,7 +469,9 @@ __global__ void kernel_name(argument list);
 | \_\_device\_\_ | device | device only | |
 | \_\_host\_\_ | host | host only | 생략해도 무방하다. |
 
-> 참고로 function이 host와 device 양쪽에서 compile된다면, \_\_device\_\_와 \_\_host\_\_ qualifier를 같이 써도 된다.
+> 참고로 function이 host와 device 양쪽에서 compile된다면, \_\_device\_\_와 \_\_host\_\_ qualifier를 같이 써도 된다. 
+
+> 예를 들면 다음과 같다.<br/> \_\_host\_\_\_\_device\_\_const char* cudaGetErrorString(cudaError_t error)
 
 또한 CUDA kernel의 제약을 정리하면 다음과 같다.
 
@@ -508,3 +510,218 @@ __global__ void sumArraysOnGPU(float *A, float *B, float *C) {
 
 ---
 
+## 2.6 Handling Errors
+
+> [error handling functions](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__ERROR.html)
+
+많은 CUDA call이 asynchronous하기 때문에, error가 어디서 발생했는지 알기 힘들다는 단점이 있다. 따라서 CUDA API call들을 검증하는 macro를 만들어서 사용하면 불편함을 줄일 수 있다.
+
+```c
+#define CHECK(call){
+  const cudaError_t error = call;
+  if (error != cudaSuccess){
+    printf("Error: %s:%d ", __FILE__, __LINE__);
+    printf("code:%d, reason: %s\n", error, cudaGetErrorString(error));
+    exit(1);
+  }
+}
+```
+
+이렇게 만들었다면 다음과 같이 사용할 수 있다.
+
+```c
+CHECK(cudaMemcpy(d_C, gpuRef, nBytes, cudaMemcpyHostToDevice));
+```
+
+debugging 목적으로 한정지으면, kernel error를 check하기 위해서 다음과 같은 테크닉을 사용할 수도 있다. 다음과 같이 preceding requested task가 끝날 때까지 host application을 막는 것이다.
+
+```c
+kernel_function<<<grid, block>>>(argument list);
+CHECK(cudaDeviceSynchronize());    // cudaError_t cudaDeviceSynchronize(void);는 바로 전 asynchronous CUDA operations의 error를 return한다.
+```
+
+---
+
+### 2.7 compiling and Executing
+
+1차원 array A, B의 행렬 덧셈을 수행한 뒤 연산 결과를 array C에 저장할 것이다. 연산은 host 버전 행렬 덧셈(sumArraysOnHost)과 GPU 버전 행렬 덧셈(sumArraysOnGPU)을 모두 수행한 뒤 서로의 연산 결과를 비교(checkResult)해 볼 것이다. 파일명은 sumArraysOnGPU-small-case.cu -o addvector이다.
+
+> 계산 결과의 신뢰성을 검토하려면 double type의 오차 허용 범위 내에서 비교를 하면 된다. 현재 예제에서는 오차의 절댓값을 1.0e-8 이하까지 허용하게 구성했다.
+
+- vector size: 32
+
+- 다음과 같이 한 block이 32개의 element으로 구성되도록 했다.
+
+  ```c
+  dim3 block (nElem);    // nElem = 32
+  dim3 grid  (nElem/block.x); 
+  ```
+
+  - 아래와 같이 block당 1개의 element로 구성하는 대신, block을 32개로 설정해도 무방하다. 다만 kernel이 사용하는 index도 수정해야 한다.
+
+    ```c
+    dim3 block (1);
+    dim3 grid  (nElem);
+
+    //...
+    int i = blockIdx.x;
+    ```
+
+```c
+#include <cuda_rumtime.h>
+#include <stdio.h>
+
+#define CHECK(call){
+    const cudaError_t error = call;
+    if (error != cudaSuccess) {
+        printf("Error: %s:%d, ", __FILE__, __LINE__);
+        printf("code:%d, reason: %s\n", error, cudaGetErrorString(error));
+        exit(1);
+    }
+}
+
+void checkResult(float *hostRef, float *gpuRef, const int N) {
+    double epsilon = 1.0E-8;
+    bool match = 1;
+    for (int i = 0; i < N; i++) {
+        if (abs(hostRef[i] - gpuRef[i]) > epsilon) {
+            match = 0;
+            printf("Arrays do not match!\n");
+            printf("host %5.2f gpu %5.2f at current %d\n", hostRef[i], gpuRef[i], i);
+            break;
+        }
+    }
+    
+    if (match) printf("Arrays match.\n\n");
+}
+
+void initialData(float *ip, int size) {
+    // generate different seed for random number
+    // Array에 random element를 채운다.
+    time_t t;
+    srand((unsigned) time(&t));
+
+    for (int i = 0; i < size; i++) {
+        ip[i] = (float)( rand() & 0xFF )/10.0f;
+    }
+}
+
+void sumArraysOnHost(float *A, float *B, float *C, const int N) {
+    // Array A, B의 각 element를 합산 = Array C
+    for (int idx = 0; idx < N; idx++) {
+        C[idx] = A[idx] + B[idx];
+    }
+}
+
+__global__ void sumArraysOnGPU(float *A, float *B, float *C) {
+    int i = threadIdx.x;
+    C[i] = A[i] + B[i];
+}
+
+int main(int argc, char **argv) {
+    printf("%s Starting...\n", argv[0]);
+
+    // set up device
+    int dev = 0;
+    cudaSetDevice(dev);
+
+    // set up data size of vectors
+    int nElem = 32;
+    printf("Vector size: %d\n", nElem);
+
+    // malloc host memory
+    size_t nBytes = nElem * sizeof(float);
+
+    float *h_A, *h_B, *hostRef, *gpuRef;
+    h_A     = (float *)malloc(nBytes);
+    h_B     = (float *)malloc(nBytes);
+    hostRef = (float *)malloc(nBytes);
+    gpuRef  = (float *)malloc(nBytes);
+
+    // initialize data at host side
+    initialData(h_A, nElem);
+    initialData(h_B, nElem);
+
+    memset(hostRef, 0, nBytes);
+    memset(gpuRef, 0, nBytes);
+
+    // malloc device global memory
+    float *d_A, *d_B, *d_C;
+    cudaMalloc((float**)&d_A, nBytes);
+    cudaMalloc((float**)&d_B, nBytes);
+    cudaMalloc((float**)&d_C, nBytes);
+
+    // transfer data from host to device
+    cudaMemcpy(d_A, h_A, nBytes, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_B, h_B, nBytes, cudaMemcpyHostToDevice);
+
+    // invoke kernel at host side
+    dim3 block (nElem);
+    dim3 grid  (nElem/block.x);
+
+    sumArraysOnGPU<<< grid, block >>>(d_A, d_B, d_C);
+    printf("Execution configuration <<<%d, %d>>>\n", grid.x, block.x);
+
+    // copy kernel result back to host side
+    cudaMemcpy(gpuRef, d_C, nBytes, cudaMemcpyDeviceToHost);
+
+    // add vector at host side for result checks
+    sumArraysOnHost(h_A, h_B, hostRef, nElem);
+
+    // check device results
+    checkResult(hostRef, gpuRef, nElem);
+
+    // free device global memory
+    cudaFree(d_A);
+    cudaFree(d_B);
+    cudaFree(d_C);
+
+    // free host memory
+    free(h_A);
+    free(h_B);
+    free(hostRef);
+    free(gpuRef);
+
+    return(0);
+}
+```
+
+다음과 같이 compile해서 실행하면 된다.
+
+```bash
+$ nvcc sumArraysOnGPU-small-case.cu -o addvector
+$ ./addvector
+```
+
+---
+
+## 2.8 timing kernel
+
+kernel이 얼마나 시간을 소모하는지, 어느 정도가 적정한 소모 시간인지를 알아야 한다. host side에서 CPU timer나 GPU timer를 사용하면 매우 쉽게 소모한 시간을 알 수 있다.
+
+---
+
+### 2.8.1 timing with CPU timer
+
+sys/time.h 라이브러리의 gettimeofday()를 이용해서 CPU timer를 만들 수 있다.
+
+```c
+double cpuSecond() {
+    struct timeval tp;
+    gettimeofday(&tp, NULL);
+    return ((double)tp.tv_sec + (double)tp.tv_usec*1.e-6);
+}
+```
+
+이렇게 timer를 만들었다면 kernel을 시작하는 시간을 기록한 뒤, 끝난 시점에서 두 시간의 차이를 측정하면 kernel 수행 시간을 알 수 있다.
+
+```c
+double iStart = cpuSecond();
+kernel_name<<<grid, block>>>(argument list);
+cudaDeviceSynchronize();
+double iElaps = cpuSecond() - iStart;
+```
+
+하지만 이렇게 시간을 측정할 경우, CPU가 모든 GPU thread가 작업을 완료할 때까지 기다리도록 cudaDeviceSynchronize()를 사용해야 한다.
+
+---
