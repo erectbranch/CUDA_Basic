@@ -39,11 +39,11 @@ Wrox(現 Willy) · 2014년 9월 9일 출시</br>
 
   > CUDA programming model, unified memory, asynchronous
 
-  > CUDA를 통한 managing memory(cudaMalloc, cudaMemcpy, cudaMemset, cudaFree) + host와 device 비교, organizing thread(grid, block 정의하는 방법), launching kernel
+  > CUDA를 통한 managing memory(cudaMalloc, cudaMemcpy, cudaMemset, cudaFree), organizing thread(grid, block 정의하는 방법), launching kernel
 
-  > (macro를 이용한) handling error, timing kernel
+  > (macro를 이용한) handling error, timing kernel(CPU timer/nvprof 이용), nvprof를 이용한 ratio of instruction:bytes 계산
 
-  > vector addition
+  > vector addition(+ host/device side 연산 결과 비교), matrix addition(2D grid, 2D blocks/1D grid, 1D blocks/ 2D grid, 1D blocks)
 
 <br/>
 
