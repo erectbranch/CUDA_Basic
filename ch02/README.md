@@ -320,7 +320,7 @@ kernel launch 구문에서 execution configutation parameters(<<<...>>>)로 grid
 
 host와 device 양쪽에서 grid와 block의 dimension을 체크할 것이다.
 
-device에서는 kernel function을 만들어서, 각자의 thread index, block index, grid dimension을 출력한다.
+device에서는 kernel function을 만들어서, 각자의 thread index, block index, grid dimension을 출력한다. 파일명은 checkDimension.cu이다.
 
 ```c
 #include <cuda_runtime.h>
@@ -518,21 +518,36 @@ __global__ void sumArraysOnGPU(float *A, float *B, float *C) {
 
 > [error handling functions](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__ERROR.html)
 
-많은 CUDA call이 asynchronous하기 때문에, error가 어디서 발생했는지 알기 힘들다는 단점이 있다. 따라서 CUDA API call들을 검증하는 macro를 만들어서 사용하면 불편함을 줄일 수 있다.
+CUDA kernel launch로 발생하는 error는 synchronous error와 asynchronos error 두 가지 type으로 나뉜다.
+
+- synchronous error: host에서 kernel이 illegal하거나 invalid한 것을 알게 되면 발생한다. 
+
+  - 예를 들어 thread block size나 grid size를 너무 크게 설정했다면, kernel launch call이 실행되는 동시에 바로 synchronous error를 발생시킨다.
+
+- asynchronous error: kernel execution, 혹은 CUDA runtime asynchronous API execution 중 발생한다.
+
+  - 예를 들어 kernel execution 중 잘못된 memory address에 접근하면 발생할 수 있다. (cudaMemcpyAsync와 같은 CUDA runtime asynchronous API execution에서 발생할 수 있다.)
+
+> kernel launch call 바로 다음에 cudaGetLastError API를 사용해서 error capturing도 가능하다.
+
+> 참고로 해결하기 어려운, not-recoverable error를 **sticky error**, recoverable한 error를 **non-sticky error**라고 지칭하기도 한다.
+
+> cudaMalloc에서 GPU memory 부족으로 일어나는 error는 non-sticky error에 해당한다. 반면 host process가 terminate되기 전까지 CUDA context가 corrupt되는 error는 sticky error에 해당한다.
+
+대체로 kernel이 asynchronous하기 때문에, error가 어디서 발생했는지 알기 힘들다는 단점이 있다. 따라서 CUDA API call들을 검증하는 macro를 만들어서 사용하면 불편함을 줄일 수 있다.
 
 ```c
-#define CHECK(call)
-{
-  const cudaError_t error = call;
-  if (error != cudaSuccess){
-    printf("Error: %s:%d ", __FILE__, __LINE__);
-    printf("code:%d, reason: %s\n", error, cudaGetErrorString(error));
-    exit(1);
-  }
+#define CHECK(ans) { gpuAssert((ans), __FILE__, __LINE__); }
+inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort =true) {
+    if (code != cudaSuccess) {
+        fprintf(stderr, "GPUassert: %s %s %d\n", cudaGetErrorString(code), file, line);
+        if (abort)
+            exit(code);
+    }
 }
 ```
 
-이렇게 만들었다면 다음과 같이 사용할 수 있다.
+이렇게 만들었다면 다음과 같이 kernel을 감싸서 사용할 수 있다.
 
 ```c
 CHECK(cudaMemcpy(d_C, gpuRef, nBytes, cudaMemcpyHostToDevice));
@@ -553,7 +568,7 @@ CHECK(cudaDeviceSynchronize());    // cudaError_t cudaDeviceSynchronize(void);�
 
 ### <span style='background-color: #393E46; color: #F7F7F7'>&nbsp;&nbsp;&nbsp;📝 예제: vector addition&nbsp;&nbsp;&nbsp;</span>
 
-1차원 array A, B(즉, vector)의 vector addition을 수행한 뒤 연산 결과를 array C에 저장할 것이다. 연산은 host 버전 vector addition(sumArraysOnHost)과 GPU 버전 vector addition(sumArraysOnGPU)을 모두 수행한 뒤 서로의 연산 결과를 비교(checkResult)해 볼 것이다. 파일명은 sumArraysOnGPU-small-case.cu -o addvector이다.
+1차원 array A, B(즉, vector)의 vector addition을 수행한 뒤 연산 결과를 array C에 저장할 것이다. 연산은 host 버전 vector addition(sumArraysOnHost)과 GPU 버전 vector addition(sumArraysOnGPU)을 모두 수행한 뒤 서로의 연산 결과를 비교(checkResult)해 볼 것이다. 파일명은 sumArraysOnGPU-small-case.cu이다.
 
 > 계산 결과의 신뢰성을 검토하려면 double type의 오차 허용 범위 내에서 비교를 하면 된다. 현재 예제에서는 오차의 절댓값을 1.0e-8 이하까지 허용하게 구성했다.
 
@@ -577,15 +592,15 @@ CHECK(cudaDeviceSynchronize());    // cudaError_t cudaDeviceSynchronize(void);�
     ```
 
 ```c
-#include <cuda_rumtime.h>
+#include <cuda_runtime.h>
 #include <stdio.h>
 
-#define CHECK(call){
-    const cudaError_t error = call;
-    if (error != cudaSuccess) {
-        printf("Error: %s:%d, ", __FILE__, __LINE__);
-        printf("code:%d, reason: %s\n", error, cudaGetErrorString(error));
-        exit(1);
+#define CHECK(ans) { gpuAssert((ans), __FILE__, __LINE__); }
+inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort =true) {
+    if (code != cudaSuccess) {
+        fprintf(stderr, "GPUassert: %s %s %d\n", cudaGetErrorString(code), file, line);
+        if (abort)
+            exit(code);
     }
 }
 
@@ -702,6 +717,10 @@ $ nvcc sumArraysOnGPU-small-case.cu -o addvector
 $ ./addvector
 ```
 
+결과는 다음과 같다.
+
+![addvector result](images/addvector.png)
+
 ---
 
 ## 2.8 timing kernel
@@ -731,7 +750,7 @@ cudaDeviceSynchronize();
 double iElaps = cpuSecond() - iStart;
 ```
 
-하지만 이렇게 시간을 측정할 경우, CPU가 모든 GPU thread가 작업을 완료할 때까지 기다리도록 cudaDeviceSynchronize()를 사용해야 한다.
+하지만 이렇게 시간을 측정할 경우, CPU가 모든 GPU thread가 작업을 완료할 때까지 기다리도록 cudaDeviceSynchronize()를 꼭 사용해야 한다.
 
 <br/>
 
@@ -743,11 +762,11 @@ double iElaps = cpuSecond() - iStart;
     int nElem = 1<<24;
     ```
 
-- array bound를 넘어가지 않도록 꼭 index를 점검해야 한다.(total thread 개수가 vector element 개수보다 많기 때문)
+- kernel의 vector addition 때, array bound를 넘어가지 않도록 꼭 index를 점검해야 한다.(total thread 개수가 vector element 개수보다 많기 때문)
 
    ```c
-   __global__ void sumArraysOnCPU(float *A, float *B, float *C, const int N) {
-    int i = blockInx.x * blockDim.x + threadIdx.x;
+   __global__ void sumArraysOnGPU(float *A, float *B, float *C, const int N) {
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i < N) {
         C[i] = A[i] + B[i];    // 
     }
@@ -758,12 +777,14 @@ double iElaps = cpuSecond() - iStart;
 
    ![vector elements < total threads](images/threads_and_vector_elements.png)
 
-다음은 sumArraysOnGPU-timer.cu 코드이다. 실제 코드와 달리 앞서 본 몇 가지 function은 생략했다.
+다음은 sumArraysOnGPU-timer.cu 코드이다. 앞서 본 몇 가지 function은 생략해서 기록했다.
 
 ```c
 #include <cuda_runtime.h>
 #include <stdio.h>
 #include <sys/time.h>
+
+// error handling을 위한 CHECK macro 생략
 
 // CPU timer 역햘을 하는 cpuSecond() 생략
 
@@ -827,7 +848,7 @@ int main(int argc, char **argv) {
     // invoke kernel at host side
     int iLen = 1024;
     dim3 block(iLen);
-    dim3 grid ((nElem/block.x-1)/block.x);
+    dim3 grid ((nElem + block.x - 1)/block.x);
 
     iStart = cpuSecond();
     sumArraysOnGPU<<<grid, block>>>(d_A, d_B, d_C, nElem);
@@ -857,19 +878,28 @@ int main(int argc, char **argv) {
 }
 ```
 
-예제대로 구성하면 1 grid가 16,384개의 block을 갖는다.(block 1개는 thread 1,024개를 가진다.)
+다음과 같이 compile 후 실행한다.
 
-여기서 1 block이 갖는 thread 수를 절반으로 줄이는 대신, block 수를 2배로 늘리면 소요되는 시간이 달라진다.
-
-```c
-sumArraysOnGPU<<<32768, 512>>>(d_A, d_B, d_C, nElem);
+```bash
+$ nvcc sumArraysOnGPU-timer.cu -o sumArraysOnGPU-timer
+$ ./sumArraysOnGPU-timer
 ```
 
-이보다 더 thread 수(block dimension)를 줄이고, block 수(grid dimension)를 늘리게 되면 에서 오류가 발생할 수 있다. device에 따라 각 thread hierarchy level의 maximum size가 다르므로 유의해야 한다.
+![sumArraysOnGPU-timer 1024 thread](images/sumArraysOnGPU-timer_1.png)
+
+예제대로 구성하면 1D grid가 16,384개의 block을 갖는다. 그리고 각 block은 thread 1,024개를 가진다.)
+
+여기서 1 block이 갖는 thread 수를 절반으로 줄이는 대신, block 수를 2배로 늘리면 소요되는 시간이 달라진다.(iLen = 512)
+
+![sumArraysOnGPU-timer 512 thread](images/sumArraysOnGPU-timer_2.png)
+
+> Tesla device 기준으로는 0.002058 sec에서 0.000183 sec로 줄어들었다.
+
+이보다 더 thread 수(block dimension)를 줄이고, block 수(grid dimension)를 늘리게 되면 device에 따라 오류가 발생할 수 있다. device에 따라 각 thread hierarchy level의 maximum size가 다르므로 유의해야 한다.
 
 ![fermi device error](images/fermi_architecture_grid_dimension_limit.png)
 
-> 예를 들어 Fermi device는 block이 가질 수 있는 thread 수의 한계가 1,024개이며, grid dimension 수치는 각 x,y,z 차원에서 최대 65,535까지만 가능하다.
+> 예를 들어 Tesla device는 block이 가질 수 있는 thread 수의 한계가 1,024개이며, grid dimension 수치는 각 x,y,z 차원에서 최대 65,535까지만 가능하다.
 
 ---
 
@@ -1006,7 +1036,7 @@ $8 \times 6$ matrix가 있다고 가정하자. matrix addition kernel에서도 t
 <br/>
 
 ### <span style='background-color: #393E46; color: #F7F7F7'>&nbsp;&nbsp;&nbsp;📝 예제: matrix element printing&nbsp;&nbsp;&nbsp;</span>
-
+c
 이제 다음과 같은 $8 \times 6$ matrix의 element를 출력해 보며 index를 확인할 것이다. 파일명은 'checkThreadIndex.cu'이다.
 
 ![8x6 matrix indices](images/matrix_ex_indices.png)
@@ -1021,14 +1051,12 @@ $8 \times 6$ matrix가 있다고 가정하자. matrix addition kernel에서도 t
 #include <cuda_runtime.h>
 #include <stdio.h>
 
-#define CHECK(call)
-{
-    const cudaError_t error = call;
-    if (error != cudaSuccess) 
-    {
-        printf("Error: %s:%d, ", __FILE__, __LINE__);
-        printf("code:%d, reason: %s\n", error, cudaGetErrorString(error));
-        exit(-10*error);
+#define CHECK(ans) { gpuAssert((ans), __FILE__, __LINE__); }
+inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort =true) {
+    if (code != cudaSuccess) {
+        fprintf(stderr, "GPUassert: %s %s %d\n", cudaGetErrorString(code), file, line);
+        if (abort)
+            exit(code);
     }
 }
 
@@ -1039,10 +1067,10 @@ void initialInt(int *ip, int size) {
     }
 }
 
-// host에서 특정 matrix를 print할 function 
+// host에서 matrix element를 print할 function 
 void printMatrix(int *C, const int nx, const int ny) {
     int *ic = C;
-    printf("\nMatrix: (%d.%d)\n"nx, ny);
+    printf("\nMatrix: (%d.%d)\n", nx, ny);
     for (int iy = 0; iy < ny; iy++) {
         for (int ix = 0; ix < nx; ix++) {
             printf("%3d", ic[ix]);
@@ -1053,7 +1081,7 @@ void printMatrix(int *C, const int nx, const int ny) {
     printf("\n");
 }
 
-// device에서 array를 print할 kernel
+// device에서 matrix element를 print할 kernel
 __global__ void printThreadIndex(int *A, const int nx, const int ny) {
     int ix = threadIdx.x + blockIdx.x * blockDim.x;
     int iy = threadIdx.y + blockIdx.y * blockDim.y;
@@ -1105,7 +1133,7 @@ int main(int argc, char **argv) {
     cudaDeviceSynchronize();
 
     // free host and device memory
-    cudaFree(d_MatA)
+    cudaFree(d_MatA);
     free(h_A);
 
     // reset device
@@ -1121,6 +1149,8 @@ int main(int argc, char **argv) {
 $ nvcc -arch=sm_80 checkThreadIndex.cu -o checkIndex
 $ ./checkIndex
 ```
+
+![checkThreadIndex](images/checkindex.png)
 
 ---
 
@@ -1166,23 +1196,23 @@ void sumMatrixOnHost(float *A, float *B, float *C, const int nx, const int ny) {
 device의 matrix addtion kernel은 다음과 같다.
 
 ```c
-__global__ void sumMatrixOnGPU2D(float *MatA, float *MatB, float *MatC,
-    int nx, int ny){
-        unsigned int ix = threadIdx.x + blockIdx.x * blockDim.x;
-        unsigned int iy = threadIdx.y + blockIdx.y * blockDim.y;
-        unsigned int idx = iy*nx + ix;
+__global__ void sumMatrixOnGPU2D(float *MatA, float *MatB, float *MatC, int nx, int ny){
+    unsigned int ix = threadIdx.x + blockIdx.x * blockDim.x;
+    unsigned int iy = threadIdx.y + blockIdx.y * blockDim.y;
+    unsigned int idx = iy*nx + ix;
 
-        if (ix < nx && iy < ny){
-            MatC[idx] = MatA[idx] + MatB[idx];
-        }
+    if (ix < nx && iy < ny){
+        MatC[idx] = MatA[idx] + MatB[idx];
     }
+}
 ```
 
 아래는 matrix addition을 수행하는 sumMatrixOnGPU-2D-grid-2D-block.cu code이다.
 
 ```c
 // include 생략
-// host와 device의 matrix addition function 생략
+// error handling을 위한 CHECK macro 생략
+// host와 device의 matrix addition function 생략(sumMatrixOnHost, sumMatrixOnGPU2D)
 // CPU timer인 CPUsecond() function 생략
 // matrix에 element를 생성하는 initialData() function 생략
 // host와 device의 결과를 비교하는 checkResult() function 생략
@@ -1240,7 +1270,7 @@ int main(int argc, char** argv){
     int dimx = 32;
     int dimy = 32;
     dim3 block(dimx, dimy);
-    dim3 grid ((nx + blockIdx.x - 1)/blockIdx.x, (ny + blockIdx.y - 1)/blockIdx.y);
+    dim3 grid ((nx + block.x - 1)/block.x, (ny + block.y - 1)/block.y);
 
     iStart = cpuSecond();
     sumMatrixOnGPU2D<<<grid, block>>>(d_MatA, d_MatB, d_MatC, nx, ny);
@@ -1280,9 +1310,17 @@ $ nvcc -arch=sm_80 sumMatrixOnGPU-2D-grid-2D-block.cu -o matrix2D
 $ ./matrix2D
 ```
 
+![matrix2D 1](images/matrix2D.png)
+
 block dimension을 32x16으로 한 뒤(block은 512x1024가 된다.). recompile해서 실행하면 시간은 약 1/2배 정도로 줄어든다. 직관적으로 생각해도 parallelism이 두 배 늘었기 떄문에 시간이 줄었다는 사실을 알 수 있다. 
 
+> 위 서술은 Tesla device 기준으로 줄어든 시간이다. 0.060323 sec에서 0.038041 sec로 줄어든다.
+
+![matrix2D 2](images/matrix2D_2.png)
+
 그러나 16x16으로 block dimension을 지정한 뒤(block은 1024x1024가 된다.), recompile하고 실행하면 오히려 시간이 더 늘어난다. 처음과 비교하면 block이 4배가 되며 parallelism이 늘었는데 어째서 이런 결과가 나오는 것일까? (ch03 참조)
+
+![matrix2D 3](images/matrix2D_3.png)
 
 > Fermi device에서 수행한 결과는 다음과 같다.
 
@@ -1344,7 +1382,9 @@ $ nvcc -arch=sm_80 sumMatrixOnGPU-1D-grid-1D-block.cu -o matrix1D
 $ ./matrix1D
 ```
 
-실행한 뒤 출력을 보면 2D grid, 2D block (32x32)과 차이가 없다는 사실을 알 수 있다. 근본적으로 같은 형태로 구성되어 작동하기 때문이다.
+![matrix1D](images/matrix1D.png)
+
+사실 결과를 보면 알 수 있지만, 이는 2D grid, 2D block (32x32)과 구조적으로 차이가 없다. 하지만 연산 시간에서 차이를 보인다.
 
 block(128,1)로 변경해서 수행을 하면 조금 더 빨라지는 모습을 발견할 수 있다.
 
@@ -1352,6 +1392,10 @@ block(128,1)로 변경해서 수행을 하면 조금 더 빨라지는 모습을 
 dim3 block(128,1);
 dim3 grid ((nx + block.x - 1)/block.x,1);
 ```
+
+![matrix1D 2](images/matrix1D_2.png)
+
+> Tesla device 기준으로 0.061352 sec에서 0.044701 sec로 빨라진다.
 
 ---
 
@@ -1370,6 +1414,13 @@ dim3 grid ((nx + block.x - 1)/block.x,1);
 ```c
 ix = threadIdx.x + blockIdx.x * blockDim.x;
 iy = blockIdx.y;
+```
+
+다음과 같이 block과 grid size를 지정한다.
+
+```c
+dim3 block(32);
+dim3 grid((nx + block.x - 1)/block.x,ny);
 ```
 
 global linear memory offset은 마찬가지다. 변경 사항을 반영한 kernel은 다음과 같다.
@@ -1402,7 +1453,13 @@ $ nvcc -arch=sm_80 sumMatrixOnGPU-2D-grid-1D-block.cu -o mat2D1D
 $ ./mat2D1D
 ```
 
-> 참고로 block size를 256으로 늘리면 시간이 더 감소한다.
+![mat2D1D](images/mat2D1D.png)
+
+참고로 block size를 256으로 늘리면 시간이 더 감소한다. 
+
+![mat2D1D 2](images/mat2D1D_2.png)
+
+> Tesla 기준으로 0.073727 sec에서 0.030765 sec가 된다.
 
 <br/>
 
