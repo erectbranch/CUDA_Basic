@@ -51,7 +51,7 @@ Wrox(現 Willy) · 2014년 9월 9일 출시</br>
 
 ## :mag: 목차
 
-### Chapter 1: Heterogeneous Parallel Computing with CUDA 1
+### Chapter 1: Heterogeneous Parallel Computing with CUDA
 
     Parallel Computing 2
 
@@ -73,7 +73,7 @@ Wrox(現 Willy) · 2014년 9월 9일 출시</br>
 
     Is CUDA C Programming Difficult? 20
 
-### Chapter 2: CUDA Programming Model 23
+### Chapter 2: CUDA Programming Model
 
     Introducing the CUDA Programming Model 23
 
@@ -119,7 +119,7 @@ Wrox(現 Willy) · 2014년 9월 9일 출시</br>
 
     Setting Devices at Runtime 64
 
-### Chapter 3: CUDA Execution Model 67
+### Chapter 3: CUDA Execution Model
 
     Introducing the CUDA Execution Model 67
 
@@ -184,7 +184,7 @@ Wrox(現 Willy) · 2014년 9월 9일 출시</br>
     Nested Reduction 128
 
 
-### Chapter 4: Global Memory 135
+### Chapter 4: Global Memory
 
     Introducing the CUDA Memory Model 136
 
@@ -227,7 +227,7 @@ Wrox(現 Willy) · 2014년 9월 9일 출시</br>
     Matrix Addition with Unified Memory 195
 
 
-### Chapter 5: Shared Memory and Constant Memory 203
+### Chapter 5: Shared Memory and Constant Memory
 
     Introducing CUDA Shared Memory 204
 
@@ -284,7 +284,7 @@ Wrox(現 Willy) · 2014년 9월 9일 출시</br>
     Parallel Reduction Using the Warp Shuffle Instruction 262
 
 
-### Chapter 6: Streams and Concurrency 267
+### Chapter 6: Streams and Concurrency
 
     Introducing Streams and Events 268
 
@@ -325,7 +325,7 @@ Wrox(現 Willy) · 2014년 9월 9일 출시</br>
     Stream Callbacks 295
 
 
-### Chapter 7: Tuning Instruction-Level Primitives 299
+### Chapter 7: Tuning Instruction-Level Primitives
 
     Introducing CUDA Instructions 300
 
@@ -346,7 +346,7 @@ Wrox(現 Willy) · 2014년 9월 9일 출시</br>
     Bringing It All Together 322
 
 
-### Chapter 8: GPU-Accelerated CUDA Libraries and OpenACC 327
+### Chapter 8: GPU-Accelerated CUDA Libraries and OpenACC
 
     Introducing the CUDA Libraries 328
 
@@ -418,7 +418,7 @@ Wrox(現 Willy) · 2014년 9월 9일 출시</br>
     OpenACC 384
 
 
-### Chapter 9: Multi-GPU Programming 387
+### Chapter 9: Multi-GPU Programming
 
     Moving to Multiple GPUs 388
 
@@ -471,7 +471,7 @@ Wrox(現 Willy) · 2014년 9월 9일 출시</br>
     GPU to GPU Data Transfer with GPUDirect RDMA 419
 
 
-### Chapter 10: Implementation Considerations 425
+### Chapter 10: Implementation Considerations
 
     The CUDA C Development Process 426
 
