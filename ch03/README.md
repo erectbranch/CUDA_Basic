@@ -1,8 +1,6 @@
 # 3 CUDA Execution Model
 
-Fermi, Kepler architecture 생략
-
-- dynamic parallelism
+Fermi, Kepler architecture 설명 생략
 
 ---
 
@@ -317,5 +315,47 @@ $$ Branch \, Efficiency = 100 \times \left( {\#Branches - \#Divvergent \, Branch
 ![nvprof branch_efficiency](images/Tesla_nvprof_profiling_2.png)
 
 처음부터 warp divergence가 생기지 않도록 구성한 mathKernel2와 다르게, mathKernel1과 3는 limited optimization이 수행된 것을 알 수 있다. 
+
+---
+
+## 3.3 Resource Partitioning
+
+warp를 resource 관점에서 볼 때, 다음 3가지 resource를 고려해야 한다.
+
+- Program counters
+
+- Registers
+
+- Shared memory
+
+SM 각각은 thread 사이로 register file이 든 32-bit register set을 가지고 있다. 또한 block 사이로 정해진 수량의 shared memory를 가지고 있다.
+
+따라서 공간에 register나 shared memory를 덜 배치하면, 더 많은 thread나 block이 simultaneous하게 처리할 수 있다.
+
+![fewer vs lower register](images/fewer_more_register.png)
+
+![fewer vs lower shared memory](images/fewer_more_shared_memory.png)
+
+따라서 SM마다 있을 수 있는 thread의 수는 resource에 의해 제약을 받는다. 하지만 register나 shared memory는 compute capability에 필수적이므로, 이 resource가 부족하면 반대로 kernel launch에 실패할 수 있다.
+
+allocate된 thread block을 **active** block이라고 지칭한다. 이 block 내부에 있는 warp를 active warps라 지칭한다. active warp는 다음 세 가지로 구분할 수 있다.
+
+- selected warp: 실제로 executing 중인 warp
+
+- stalled warp: ready(준비)가 안 된 warp
+
+- eligible warp: ready 상태인 warp
+
+ready는 다음 조건을 만족해야 가능하다.
+
+- CUDA core 32개 모두 execute가 가능하다.
+
+- 해당 instruction의 모든 argument가 준비되었다.
+
+> SM의 warp scheduler들은 매 cycle마다 active warp를 선택하고 dispatch(준비에서 실행 상태로 변경)한다. 
+
+예를 들어 Kepler SM에서 concurrent한 active warp의 수는 architecture limit인 64개를 넘을 수 없다. 또한 한 cycle당 selected warp는 4개 이하만 가능하다. 만약 어떤 warp가 stall되면, warp scheduler는 이를 대신하기 위해 eligible warp를 고른다.
+
+이렇게 warp contexts를 switching하는 과정은 굉장히 빠르다.(warp 사이로 compute resource들이 배치되어 있다는 사실을 기억하자.) 덕분에 warp 수만 충분하다면 warp stall로 생기는 latency를 숨길 수 있다.
 
 ---
