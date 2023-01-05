@@ -298,7 +298,7 @@ $ nvprof --metrics branch_efficiency ./simpleDivergence
 
 branch efficiency는 전체 branch에서 non-divergent branch가 차지하는 비율을 의미한다.
 
-$$ Branch \, Efficiency = 100 \times \left( {Branches - Divvergent \, Branches} \over {Branches} \right) $$
+$$ Branch Efficiency = 100 \times \left( {Branches - Divvergent Branches} \over {Branches} \right) $$
 
 다음은 Tesla device에서 mathKernel1과 mathKernel2를 profiling을 진행한 결과이다.
 
@@ -386,7 +386,7 @@ instruction latency는 다음 두 가지 instruction 분류에서 살펴볼 수 
 
 그렇다면 latency hiding을 위해서 얼마나 active warp가 필요할까? **Little's Law**(리틀의 법칙)을 GPU에 적용해서 다음과 같이 나타낼 수 있다.
 
-$$ Number \, of \, Required \, Warps = Latency \, \times \, Throughput $$
+$$ Number of Required Warps = Latency \times Throughput $$
 
 ![Little's Law](images/littles_law.png)
 
@@ -436,7 +436,7 @@ $$ 74KB \div 4 bytes/thread \cong 18,500 threads $$
 
 $$ 18,500 threads \div 32 threads/warp \cong 579 warps $$
 
-Fermi architecture는 16SM을 가지고 있으므로, latency hiding을 위해서 SM당 579/16 = 36 warps가 필요한 셈이다. 이처럼 latency hiding은 SM당 active warp 수에 달려 있다. 또한 이러한 warp의 수는 execution configuration과 resource 제약(register와 kernel의 memory 사용량)의 영향을 받는다. 
+Fermi architecture는 16SM을 가지고 있으므로, latency hiding을 위해서 SM당 579/16 = 36 warps가 필요한 셈이다. 이처럼 latency hiding은 SM당 active warp 수에 달려 있다. 또한 이러한 warp의 수는 execution configuration과 resource limit(register와 kernel의 memory 사용량)의 영향을 받는다. 
 
 따라서 latency hiding과 resource utilization 사이의 균형을 정하는 것이 중요한 문제다.
 
@@ -448,9 +448,9 @@ Fermi architecture는 16SM을 가지고 있으므로, latency hiding을 위해�
 
 instruction은 CUDA core에서 순차적으로 execute된다. 이때 한 warp가 stall되면, SM은 다른 eligible warp가 execute하도록 switch한다. 하지만 이를 위해서 여분의 warp를 너무 남긴다면 낭비가 생길 것이다.
 
-**occupancy**는 (SM가 갖는) warp의 최대 수에서 active warp가 갖는 비율을 의미한다. occupancy를 최대한 늘릴 수 있어야 한다.
+**occupancy**는 (SM가 갖는) warp의 최대 수에서 active warp가 갖는 비율을 의미한다. 다시 말해 occupancy를 늘려야 performance 향상을 기대할 수 있을 것이다.
 
-$$ occupancy = {active warps} \over {maximum warps} $$
+$$ occupancy = {{active warps} \over {maximum warps}} $$
 
 여기서 SM당 maximum warp 수는 CUDA를 이용해서 알아낼 수 있다. (maxThreadsPerMultiProcessor이란 variable로 return된다.)
 
@@ -477,7 +477,7 @@ int main(int argc, char *argv[]) {
         iProp.sharedMemPerBlock/1024.0);
     printf("Total number of registers available per block: %d\n",
         iProp.regsPerBlock);
-    printf("Warp size: %d\n, deviceProp.warpSize");
+    printf("Warp size: %d\n", iProp.warpSize);
     printf("Maximum number of threads per block: %d\n",
         iProp.maxThreadsPerBlock);
     printf("Maximum number of threads per multiprocessor: %d\n",
@@ -494,6 +494,8 @@ int main(int argc, char *argv[]) {
 $ nvcc simpleDeviceQuery.cu -o simpleDeviceQuery
 $ ./simpleDeviceQuery
 ```
+
+![simpleDeviceQuery](images/simpleDeviceQuery.png)
 
 Tesla device를 기준으로는 다음과 같이 report 결과를 얻을 수 있다.
 

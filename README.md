@@ -47,6 +47,19 @@ Wrox(現 Willy) · 2014년 9월 9일 출시</br>
 
 - [query GPU information](https://github.com/erectbranch/CUDA_Basic/blob/master/ch02/management.md): CUDA runtime API/nvidia-smi
 
+### 💻 GPU architecture, CUDA Execution Model
+
+- [CUDA Execution Model](https://github.com/erectbranch/CUDA_Basic/tree/master/ch03)
+
+  > warp, warp divergence, interleaving, branch granularity, selected/stalled/eligible warp
+
+  > (arithmetic/memory instruction) latency hiding, latency hiding을 위한 warp 수(Little's Law), synchronization, race condition(hazard)
+
+  > occupancy, scalability, global load throughput/global load efficiency 확인, grid/block size guideline
+  
+  > 예제: GPU configuration information query(cudaGetDeviceProperties)
+
+
 <br/>
 
 ## :mag: 목차
