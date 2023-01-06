@@ -49,7 +49,7 @@ Wrox(現 Willy) · 2014년 9월 9일 출시</br>
 
 ### 💻 GPU architecture, CUDA Execution Model
 
-- [CUDA Execution Model](https://github.com/erectbranch/CUDA_Basic/tree/master/ch03)
+- [CUDA Execution Model](https://github.com/erectbranch/CUDA_Basic/tree/master/ch03/summary01)
 
   > warp, warp divergence, interleaving, branch granularity, selected/stalled/eligible warp
 
@@ -59,6 +59,13 @@ Wrox(現 Willy) · 2014년 9월 9일 출시</br>
   
   > 예제: GPU configuration information query(cudaGetDeviceProperties)
 
+- [avoid branch divergence, dynamic parallelism](https://github.com/erectbranch/CUDA_Basic/tree/master/ch03/summary02)
+
+  > host side parallel reduction, neighbored pair/neighbored pair(index rearranging)/interleaved pair implementation
+
+  > last warp unrolling/complete unrolling, template function
+
+  > CUDA dynamic parallelism
 
 <br/>
 

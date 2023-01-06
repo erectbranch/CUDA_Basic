@@ -1036,7 +1036,7 @@ $8 \times 6$ matrix가 있다고 가정하자. matrix addition kernel에서도 t
 <br/>
 
 ### <span style='background-color: #393E46; color: #F7F7F7'>&nbsp;&nbsp;&nbsp;📝 예제: matrix element printing&nbsp;&nbsp;&nbsp;</span>
-c
+
 이제 다음과 같은 $8 \times 6$ matrix의 element를 출력해 보며 index를 확인할 것이다. 파일명은 'checkThreadIndex.cu'이다.
 
 ![8x6 matrix indices](images/matrix_ex_indices.png)
