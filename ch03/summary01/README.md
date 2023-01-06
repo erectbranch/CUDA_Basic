@@ -277,6 +277,8 @@ int main(int argc, char **argv) {
 }
 ```
 
+> first kernel call은 시간이 더 소모된다. 따라서 benchmaking을 위해서는 한 번 kernel을 'cooking'한 뒤 시도해야 한다. 이것이 바로 첫 번째 kernel로 warmup kernel을 추가한 이유다.
+
 다음과 같이 compile한 뒤 실행한다.
 
 ```bash
