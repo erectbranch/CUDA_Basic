@@ -324,7 +324,7 @@ $$ Branch Efficiency = 100 \times \left( {Branches - Divvergent Branches} \over 
 
 warp를 resource 관점에서 볼 때, 다음 3가지 resource를 고려해야 한다.
 
-- Program counters
+- Program Counters
 
 - Registers
 
@@ -366,7 +366,7 @@ ready는 다음 조건을 만족해야 가능하다.
 
 각 instruction 사이의 latency는 다른 resident warp에 다른 instruction을 issuing하는 것으로 감출 수 있다.
 
-한 번에 하나에서 두 thread를 사용하며 latency를 minimize하게 디자인된 CPU core와 다르게, GPU는 throughput을 maximize하기 우ㅣ해 많은 수의 concurrent하고 lightweight한 thread들을 사용한다. 따라서 CUDA programming에서 latency hiding이 더 중요할 수밖에 없다.
+한 번에 하나에서 두 thread를 사용하며 latency를 minimize하게 디자인된 CPU core와 다르게, GPU는 throughput을 maximize하기 위해 많은 수의 concurrent하고 lightweight한 thread들을 사용한다. 따라서 CUDA programming에서 latency hiding이 더 중요할 수밖에 없다.
 
 instruction latency는 다음 두 가지 instruction 분류에서 살펴볼 수 있다.
 
