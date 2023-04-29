@@ -35,7 +35,7 @@ Wrox(現 Willy) · 2014년 9월 9일 출시</br>
 
   > CUDA 간단 예제: hello world 출력
 
-- [CUDA Programming Model](https://github.com/erectbranch/CUDA_Basic/tree/master/ch02)
+- [CUDA Programming Model](https://github.com/erectbranch/CUDA_Basic/tree/master/ch02/summary01/)
 
   > CUDA programming model, unified memory, asynchronous
 
