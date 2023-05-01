@@ -25,7 +25,7 @@ Wrox(現 Willy) · 2014년 9월 9일 출시</br>
 
 ## 🚩 정리한 문서 목록
 
-### 📔 computer architecture, CUDA 기초
+### 📔 computer architecture, CUDA basic
 
 - [heterogeneous parallel computing with CUDA](https://github.com/erectbranch/CUDA_Basic/tree/master/ch01)
 
@@ -37,9 +37,15 @@ Wrox(現 Willy) · 2014년 9월 9일 출시</br>
 
 - [CUDA Programming Model](https://github.com/erectbranch/CUDA_Basic/tree/master/ch02/summary01/)
 
+  > Graphics card(GPU, VRAM(GDDR, GBM)), spectrum of GPU
+
+  > GPU architecture overview(SM, LD/ST units, SFU, TMU), SM(Compute units, registers, L1 cache, shared memory), latency hiding(warp, thread)
+
   > CUDA programming model, unified memory, asynchronous
 
   > CUDA를 통한 managing memory(cudaMalloc, cudaMemcpy, cudaMemset, cudaFree), organizing thread(grid, block 정의하는 방법), launching kernel
+
+- [CUDA handling](https://github.com/erectbranch/CUDA_Basic/tree/master/ch02/summary02/)
 
   > (macro를 이용한) handling error, timing kernel(CPU timer/nvprof 이용), nvprof를 이용한 ratio of instruction:bytes 계산
 
