@@ -124,7 +124,7 @@ GPU는 cache가 적어서 VRAM에 접근할 때마다 penalty를 겪게 된다. 
 
 GPU가 instruction을 실행해야 한다고 하자. 아래와 같은 방법으로 idle(혹은 wasted) time을 발생시키지 않는 것이다.
 
-- 기존의 long-letency operation(memory access 등)으로 길게 기다려야 하는 warp는 선택하지 않는다.
+- 기존의 long-latency operation(memory access 등)으로 길게 기다려야 하는 warp는 선택하지 않는다.
 
 - 실행 준비가 된 warp를 선택해서 실행한다.
 
