@@ -8,9 +8,9 @@
 
 ## 1.1 Parallel Computing
 
-**parallel computing**은 여러 연산을 simultaneous하게 수행하고, 큰 problem을 작은 problem들로 나눠서 **concurrent**하게 수행하는 것을 의미한다. 이때 이렇게 작게 나뉜 연산 piece를 **task**라고 한다.
+parallel computing이란 여러 연산을 simultaneous하게 수행하고, 큰 problem을 작은 problem들로 나눠서 **concurrent**하게 수행하는 것을 의미한다. 이때 이렇게 작게 나뉜 연산 piece를 **task**라고 한다.
 
-여기서 concurrency(동시성)이란 정확히는 동시에 실행되는 것'처럼' 보이는 개념이다. 예를 들어 한 개의 core에서도 작업 간에 **context switch**하여 여러 작업을 concurrent하게 수행할 수 있다.
+여기서 **concurrency**(동시성)이란 정확히는 동시에 실행되는 것'처럼' 보이는 개념이다. 예를 들어 한 개의 core에서도 작업들을 **context switch**하는 방법으로 여러 작업을 concurrent하게 수행할 수 있다.
 
 ![context switch](images/context_switch.png)
 
@@ -24,7 +24,7 @@
 
 computer architecture 관점에서는 problem을 multiple processes 또는 multiple thread을 이용해서 concurrent하게 해결하고자 한다. 여기서 제일 중요한 component가 주로 **core**라고 지칭하는 **CPU**(Central Processing Unit)이다.
 
-현재는 architecture 수준에서 parallelism을 지원하는 multicore가 존재한다. 여기서 programming은 problem 연산을 가능한 core들에게 mapping하여 실행하게 만드는 역할을 한다.
+현재는 hardware architecture 수준에서 parallelism을 지원하는 multicore가 존재한다. 여기서 programming은 연산이 가능한 core들에게 효율적으로 mapping이 되도록 하는 역할을 맡는 것이다.
 
 > 특히 multicore에서의 algorithm 구현을 위해서는, computer architecture의 구조를 상세하게 이해할 필요가 있다.
 
@@ -32,19 +32,19 @@ computer architecture 관점에서는 problem을 multiple processes 또는 multi
 
 ## 1.2 Sequential and Parallel Programming
 
-sequential programming의 경우 다음과 같이 연산이 수행된다.
+- sequential programming
 
-![sequential programming](images/sequential_programming.png)
+  ![sequential programming](images/sequential_programming.png)
 
-여기서 program의 task가 concurrent하게 수행된다면 parallel programming이다. 
+- parallel programming
 
-![sequential parallel programming](images/sequential_parallel_programming.png)
+  ![sequential parallel programming](images/sequential_parallel_programming.png)
 
 program은 기본적으로 **instruction**와 **data** 두 개의 ingredients를 갖는다. 
 
-- task에서 각 instruction은 input을 받아서 function에 적용하고, output을 생성한다. 
+- instruction은 input을 받아서 function을 수행(ALU 등이 연산)하고 output을 도출한다. 
 
-- 이때 주의할 점은 instruction 처리 중에 **data dependency**가 발생할 수 있다.
+- 이때 instruction 처리 중에 발생할 수 있는 **data dependency**를 주의해야 한다.
 
 ---
 
@@ -70,7 +70,9 @@ data parallel program을 design하기 위해서는, 우선 data를 여러 thread
 
 - block partitioning
 
-  **block partitioning**은 여러 element를 **chunk**로 묶인다. (대체로) 한 번에 한 chunk를 single thread가 처리한다.
+  **block partitioning**은 여러 element를 **chunk**로 묶인다. 
+  
+  - (대체로) single thread가 한 번에 한 chunk를 처리한다.
 
   아래 그림이 1차원 data를 partition한 block partition이다.
 
@@ -78,7 +80,9 @@ data parallel program을 design하기 위해서는, 우선 data를 여러 thread
 
 - cyclic partitioning
 
-  **cyclic partitioning**에서는 좀 더 적은 양의 data element를 chunk로 묶는다. 각 thread는 하나 이상의 chunk를 처리한다.
+  **cyclic partitioning**에서는 좀 더 적은 양의 data element를 chunk로 묶는다. 
+  
+  - 각 thread가 하나 이상의 chunk를 처리한다.
 
   아래 그림이 1차원 data를 partition한 cyclic partition이다.
 
@@ -86,15 +90,9 @@ data parallel program을 design하기 위해서는, 우선 data를 여러 thread
 
 <br/>
 
-2차원 이상의 data라면 x축, y축과 같은 기준을 정해 partitioning할 수 있다. 
+2차원 이상의 data일 때는 어떨까? 2차원의 경우 다음과 같이 x,y축을 기준으로 partitioning할 수 있다. 
 
 ![partition on dimenstion](images/partition_on_dimension.png)
-
-- 좌측: y축을 기준으로 block partition.
-
-- 중앙: x,y축 두 기준으로 block partition.
-
-- 우측: x축을 기준으로 cyclic partition.
 
 > 사실 hardware적인 관점에서는 data가 physical storage에 결국 1차원으로 mapping된다. 
 
@@ -102,39 +100,47 @@ data parallel program을 design하기 위해서는, 우선 data를 여러 thread
 
 ## 1.4 Computer Architecture
 
-computer architecture를 분류하는 방법은 다양하게 있지만, **Flynn's Taxonomy** 분류가 대표적으로 쓰인다. 이 분류는 computer architecture를 4가지 type으로 나눈다.
+대체로 아래 **Flynn's Taxonomy**를 이용해 computer architecture를 분류하는 경우가 많다. 이 분류에서는 computer architecture를 4가지 type으로 나눈다.
 
 ![Flynn's Taxonomy](images/computer_architecture_classification.png)
 
 - **SISD**(Single Instruction Single Data)
 
-  traditional computer에 해당한다. 오직 core가 한 개 존재하며, 한 번에 오직 한 instruction stream만 실행된다. 
+  (traditional computer) 오직 core가 한 개 존재하며, 한 번에 오직 한 instruction stream만 실행된다. 
 
 - **SIMD**(Single Instruction Multiple Data)
 
-  parallel architecture에 속한다. multiple core를 가지며 모든 core가 한 번에 '같은 instruction을 execute'한다. (대부분의 modern computer가 SIMD에 속한다.) SIMD의 가장 큰 장점은 compiler 덕분에 프로그래머들은 sequential하게 program을 구성해도 parallel speedup을 달성할 수 있다는 점이다.
+  (대부분의 modern computer) parallel architecture에 속한다. multiple core를 가지며 '모든 core가 한 번에 같은 instruction을 execute'한다. 
+  
+  - SIMD의 가장 큰 장점: 프로그래머들이 sequential하게 program을 구성해도, compiler 덕분에 parallel speedup을 얻을 수 있다.
 
 - **MISD**(Multiple Instruction Single Data)
 
-  비교적 드문 architecture로, multiple core가 seperate instruction stream을 통해 같은 data stream을 처리한다.
+  비교적 드문 architecture로, multiple core가 seperate instruction stream로 같은 data stream을 처리한다.
 
 - **MIMD**(Multiple Instruction Multiple Data)
 
-  multiple core를 사용한 parallel architecture다. multiple data stream으로 구성되며 각각은 independent instruction을 처리한다. 참고로 대부분의 MIMD architecture는 sub-component로 SIMD를 포함한다.
+  multiple core를 사용한 parallel architecture다. multiple data stream으로 구성되며 각각 independent instruction을 처리한다. 
+  
+  > 참고로 대부분의 MIMD architecture는 sub-component로 SIMD를 포함한다.
 
 ---
 
 ### 1.4.1 performance
 
-architecture level에서 다음 performance를 높일 수 있는 방법을 고려해야 한다.
+architecture level에서 다음 지표를 주로 performance로 사용한다. 따라서 다음 지표들을 높일 수 있는 방법을 고려해야 한다.
 
 - **latency**: operation이 시작해서 끝날 때까지의 시간(주로 ms 단위 사용)
+
+  > response time, 혹은 execution time으로도 부른다.
 
 - **bandwidth**: 대역폭. 단위 시간당 처리하는 data의 양.(주로 megabytes/sec 혹은 gigabytes/sec 단위 사용)
 
   - gflops: billion floating-point operations per second를 의미한다.
 
 - **throughput**: 처리율. 단위 시간당 처리하는 operation의 양.(주로 gflops 단위 사용)
+
+개개인의 컴퓨터 사용자 입장에서는 주로 하루에 얼마나 더 많은 일을 할 수 있는지가 중요하기 때문에, latency를 더 중요하게 볼 가능성이 높다. 하지만 여러 사용자가 사용하는 데이터센터 입장에서는, 얼마나 더 많은 일을 처리할 수 있는가가 더 중요하므로 throughput을 더 중요하게 볼 가능성이 높다.
 
 ---
 
@@ -169,9 +175,11 @@ computer architecture는 memory organization 관점에서도 크게 두 가지�
 
 ## 1.5 heterogeneous computing
 
-> homogeneous system에서 heterogeneous system으로의 전환을 HPC 실현으로 가는 기념비적인 사건으로 본다.
+> homogeneous system에서 heterogeneous system으로의 전환을 HPC로 가는 기념비적인 사건으로 보는 시점도 있다.
 
-보통 CPU와 GPU는 single computer node에서 PCIe bus로 연결되어 discrete하게 구성된다. 이런 system이 바로 **heterogeneous system**이며 각자에게 well-suited task를 맡아 수행한다. 하지만 이런 architecture는 design complexity에 의해 여러 limit를 가지게 된다.
+보통 CPU와 GPU는 single computer node에서 PCIe bus로 연결되는 discrete한 방식으로 구성된다. 이런 system이 바로 **heterogeneous system**이며 각자가 well-suited task를 맡아 수행한다. 
+
+하지만 이런 heterogeneous system도 design complexity에 의해 여러 limit를 가지게 된다.
 
 ---
 
@@ -219,7 +227,7 @@ CPU와 GPU가 어떤 task에서 유용한지 알기 위해 parallelism level과 
 
 ![CUDA platform](images/cuda_platform.png)
 
-CUDA는 NVIDIA GPU에서 복잡한 계산 문제를 더 효율적이게 수행하기 위해 만들어진 parallel computing platform이자 programming model이다.
+**CUDA**(Compute Unified Device Architecture)는 NVIDIA GPU에서 복잡한 계산 문제를 더 효율적이게 수행하기 위해 만들어진 parallel computing platform이자 programming model이다.
 
 CUDA platform은 CUDA-accelerated library, compiler directives, application programming interfaces, 그리고 다른 프로그래밍 언어(C, C++, Fortran, Python)의 extension 등으로 사용할 수 있다.
 
@@ -347,7 +355,7 @@ locality는 두 가지 종류로 나눌 수 있다.
 
 다시 말해 프로그래머는 low-level cache optimization이 가능해야 한다. 하지만 CPU가 어떻게 schedule되는지 프로그래머가 알기는 어렵다.
 
-이때 CUDA는 memory hierarchy와 thread hierarchy를 확인할 수 있는 유용한 수단으로 사용될 수 있다.
+이때 CUDA를 memory hierarchy와 thread hierarchy를 확인할 수 있는 유용한 수단으로 사용할 수 있다.
 
 ---
 
