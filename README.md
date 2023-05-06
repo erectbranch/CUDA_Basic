@@ -51,7 +51,7 @@ Wrox(現 Willy) · 2014년 9월 9일 출시</br>
 
   > 예제: vector addition(+ host/device side 연산 결과 비교), matrix addition(2D grid, 2D blocks/1D grid, 1D blocks/ 2D grid, 1D blocks)
 
-- [query GPU information](https://github.com/erectbranch/CUDA_Basic/blob/master/ch02/management.md): CUDA runtime API/nvidia-smi
+- [query GPU information](https://github.com/erectbranch/CUDA_Basic/blob/master/ch02/summary03/): CUDA runtime API/nvidia-smi
 
 ### 💻 GPU architecture, CUDA Execution Model
 
