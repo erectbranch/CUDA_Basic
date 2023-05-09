@@ -9,7 +9,7 @@
   
 
 <b>John Cheng · Max Grossman · Ty McKercher 저</b></br>
-Wrox(現 Willy) · 2014년 9월 9일 출시</br>
+Wrox(現 Willy) · 2014년 9월 9일 출간</br>
 [[ERRATA](https://www.wiley.com/en-us/Professional+CUDA+C+Programming-p-9781118739327)] [[Code Samples](https://media.wiley.com/product_ancillary/29/11187393/DOWNLOAD/CodeSamples.zip)] [[Solutions](https://media.wiley.com/product_ancillary/29/11187393/DOWNLOAD/Solutions.zip)]</b> 
 
 </div>
@@ -25,15 +25,21 @@ Wrox(現 Willy) · 2014년 9월 9일 출시</br>
 
 ## 🚩 정리한 문서 목록
 
-### 📔 computer architecture, CUDA basic
+### 💻 CPU-GPU Heterogeneous System
 
-- [heterogeneous parallel computing with CUDA](https://github.com/erectbranch/CUDA_Basic/tree/master/ch01)
+- [Parallel Computing](https://github.com/erectbranch/CUDA_Basic/tree/master/ch01/summary01/)
 
   > parallel computing, concurrency, sequential programming, task/data/block/cyclic parallelism
 
-  > SISD/SIMD/MISD/MIMD, latency, bandwidth, throughput, multi-node with distributed memory/multiprocessor with shared memory, heterogeneous computing, host/device code
+  > SISD/SIMD/MISD/MIMD, performance(latency, bandwidth, throughput), memory organization
 
-  > CUDA 간단 예제: hello world 출력
+- [Heterogeneous Computing with CUDA](https://github.com/erectbranch/CUDA_Basic/tree/master/ch01/summary02/)
+
+  > heterogeneous computing, CUDA Driver API, CUDA Runtime API
+  
+  > CUDA Programming: Hello World
+
+### 📔 Basic CUDA Programming
 
 - [CUDA Programming Model](https://github.com/erectbranch/CUDA_Basic/tree/master/ch02/summary01/)
 
