@@ -59,7 +59,7 @@ Wrox(現 Willy) · 2014년 9월 9일 출간</br>
 
 - [query GPU information](https://github.com/erectbranch/CUDA_Basic/blob/master/ch02/summary03/): CUDA runtime API/nvidia-smi
 
-### 💻 GPU architecture, CUDA Execution Model
+### ⚙️ GPU architecture, CUDA Execution Model
 
 - [CUDA Execution Model](https://github.com/erectbranch/CUDA_Basic/tree/master/ch03/summary01)
 
@@ -529,7 +529,6 @@ Wrox(現 Willy) · 2014년 9월 9일 출간</br>
 
     Memory Debugging 456
 
-
     A Case Study in Porting C Programs to CUDA C 462
 
     Assessing crypt 463
@@ -539,4 +538,5 @@ Wrox(現 Willy) · 2014년 9월 9일 출간</br>
     Optimizing crypt 465
 
     Deploying Crypt 472
+    
     Porting crypt 475
